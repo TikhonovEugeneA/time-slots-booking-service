@@ -1,0 +1,20 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose.yml
+
+# Virtual environment
+.env
+.venv
+
+# Cache 
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Docs
+*.md
