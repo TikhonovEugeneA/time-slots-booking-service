@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class BookingStatus(str, Enum):
+class BookingStatus(StrEnum):
     BOOKED = "BOOKED"
     CANCELLED = "CANCELLED"
     COMPLETED = "COMPLETED"

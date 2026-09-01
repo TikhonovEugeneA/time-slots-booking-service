@@ -11,6 +11,3 @@ class Specialist:
     specialization: str
     is_available: bool = True
     created_at: datetime
-
-    def create(self):
-        self.specialization = self.specialization.strip()

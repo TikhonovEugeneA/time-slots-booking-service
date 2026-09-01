@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncEngine,
+    AsyncSession,
     async_sessionmaker,
 )
 from infrastructure.config import Settings
@@ -15,11 +16,11 @@ class DatabaseHelper:
             pool_size=settings.database.pool_size,
             max_overflow=settings.database.max_overflow,
             pool_pre_ping=settings.database.pool_pre_ping,
-            pool_recyle=settings.database.pool_recycle,
+            pool_recycle=settings.database.pool_recycle,
             pool_timeout=settings.database.pool_timeout,
         )
 
-        self.session_factory: async_sessionmaker[AsyncEngine] = async_sessionmaker(
+        self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
             bind=self.engine,
             autoflush=False,
             autocommit=False,

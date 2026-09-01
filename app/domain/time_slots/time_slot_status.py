@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Status(str, Enum):
+class TimeSlotStatus(StrEnum):
     AVAILABLE = "AVAILABLE"
     BLOCKED = "BLOCKED"
