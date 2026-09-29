@@ -15,7 +15,3 @@ class Base(DeclarativeBase):
     id: Mapped[UUID] = mapped_column(
         primary_key=True, autoincrement=True, default=uuid7
     )
-
-    @declared_attr.directive
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower() + "s"

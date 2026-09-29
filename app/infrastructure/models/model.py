@@ -20,22 +20,24 @@ from app.infrastructure.models import Base, CreatedAtMixin, MetadataMixin
 
 class UserModel(Base, CreatedAtMixin):
 
+    __tablename__ = "users"
+
     name: Mapped[str] = mapped_column(String(200))
     email: Mapped[str] = mapped_column(CITEXT(320), unique=True)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    specialist: Mapped["Specialist"] = relationship(
-        "Specialist", back_populates="user", uselist=False
+    specialist: Mapped["SpecialistModel"] = relationship(
+        "SpecialistModel", back_populates="user", uselist=False
     )
 
-    bookings: Mapped[list["Booking"]] = relationship(
-        "Booking",
+    bookings: Mapped[list["BookingModel"]] = relationship(
+        "BookingModel",
         back_populates="client",
     )
 
-    auditlogs: Mapped[list["AuditLog"]] = relationship(
-        "AuditLog",
+    audit_logs: Mapped[list["AuditLogModel"]] = relationship(
+        "AuditLogModel",
         back_populates="actor",
     )
 
@@ -63,13 +65,15 @@ class UserModel(Base, CreatedAtMixin):
 
 class ServiceCenterModel(Base, CreatedAtMixin):
 
+    __tablename__ = "service_centers"
+
     name: Mapped[str] = mapped_column(String(200), unique=True)
     address: Mapped[str] = mapped_column(String(500))
     timezone: Mapped[str] = mapped_column(String(100))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    specialists: Mapped[list["Specialist"]] = relationship(
-        "Specialist", back_populates="service_center"
+    specialists: Mapped[list["SpecialistModel"]] = relationship(
+        "SpecialistModel", back_populates="service_center"
     )
 
     def to_domain(self) -> ServiceCenter:
@@ -96,24 +100,26 @@ class ServiceCenterModel(Base, CreatedAtMixin):
 
 class SpecialistModel(Base, CreatedAtMixin):
 
+    __tablename__ = "specialists"
+
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    center_id: Mapped[UUID] = mapped_column(ForeignKey("servicecenters.id"))
+    center_id: Mapped[UUID] = mapped_column(ForeignKey("service_centers.id"))
     specialization: Mapped[str] = mapped_column(String(200))
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    user: Mapped["User"] = relationship(
-        "User",
+    user: Mapped["UserModel"] = relationship(
+        "UserModel",
         back_populates="specialist",
         uselist=False,
         lazy="joined",
     )
 
-    service_center: Mapped["ServiceCenter"] = relationship(
-        "ServiceCenter", back_populates="specialists"
+    service_center: Mapped["ServiceCenterModel"] = relationship(
+        "ServiceCenterModel", back_populates="specialists"
     )
 
-    timeslots: Mapped[list["TimeSlot"]] = relationship(
-        "TimeSlot",
+    time_slots: Mapped[list["TimeSlotModel"]] = relationship(
+        "TimeSlotModel",
         back_populates="specialist",
     )
 
@@ -141,6 +147,8 @@ class SpecialistModel(Base, CreatedAtMixin):
 
 class TimeSlotModel(Base, CreatedAtMixin):
 
+    __tablename__ = "time_slots"
+
     specialist_id: Mapped[UUID] = mapped_column(ForeignKey("specialists.id"))
     starts_at: Mapped[datetime]
     ends_at: Mapped[datetime]
@@ -148,14 +156,14 @@ class TimeSlotModel(Base, CreatedAtMixin):
         Enum(TimeSlotStatus), default=TimeSlotStatus.AVAILABLE
     )
 
-    specialist: Mapped["Specialist"] = relationship(
-        "Specialist",
-        back_populates="timeslots",
+    specialist: Mapped["SpecialistModel"] = relationship(
+        "SpecialistModel",
+        back_populates="time_slots",
     )
 
-    booking: Mapped["Booking"] = relationship(
-        "Booking",
-        back_populates="timeslot",
+    booking: Mapped["BookingModel"] = relationship(
+        "BookingModel",
+        back_populates="time_slot",
     )
 
     def to_domain(self) -> TimeSlot:
@@ -182,7 +190,9 @@ class TimeSlotModel(Base, CreatedAtMixin):
 
 class BookingModel(Base, CreatedAtMixin):
 
-    slot_id: Mapped[UUID] = mapped_column(ForeignKey("timeslots.id"))
+    __tablename__ = "bookings"
+
+    slot_id: Mapped[UUID] = mapped_column(ForeignKey("time_slots.id"))
     client_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     subject: Mapped[str] = mapped_column(String(500))
     status: Mapped[BookingStatus] = mapped_column(Enum(BookingStatus))
@@ -193,18 +203,18 @@ class BookingModel(Base, CreatedAtMixin):
     cancelled_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
 
-    timeslot: Mapped["TimeSlot"] = relationship(
-        "TimeSlot",
+    time_slot: Mapped["TimeSlotModel"] = relationship(
+        "TimeSlotModel",
         back_populates="booking",
     )
 
-    client: Mapped["User"] = relationship(
-        "User",
+    client: Mapped["UserModel"] = relationship(
+        "UserModel",
         back_populates="bookings",
     )
 
-    auditlogs: Mapped[list["AuditLog"]] = relationship(
-        "AuditLog",
+    audit_logs: Mapped[list["AuditLogModel"]] = relationship(
+        "AuditLogModel",
         back_populates="booking",
     )
 
@@ -238,20 +248,22 @@ class BookingModel(Base, CreatedAtMixin):
 
 class AuditLogModel(Base, CreatedAtMixin, MetadataMixin):
 
+    __tablename__ = "audit_logs"
+
     booking_id: Mapped[UUID] = mapped_column(
         ForeignKey("bookings.id", ondelete="RESTRICT")
     )
     action: Mapped[BookingStatus] = mapped_column(Enum(BookingStatus))
     actor_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
-    booking: Mapped["Booking"] = relationship(
-        "Booking",
-        back_populates="auditlogs",
+    booking: Mapped["BookingModel"] = relationship(
+        "BookingModel",
+        back_populates="audit_logs",
     )
 
-    actor: Mapped["User"] = relationship(
-        "User",
-        back_populates="auditlogs",
+    actor: Mapped["UserModel"] = relationship(
+        "UserModel",
+        back_populates="audit_logs",
     )
 
     def to_domain(self) -> AuditLog:
@@ -260,7 +272,7 @@ class AuditLogModel(Base, CreatedAtMixin, MetadataMixin):
             booking_id=self.booking_id,
             action=self.action,
             actor_id=self.actor_id,
-            metadata=self.metadata,
+            metadata=self.meta,
             created_at=self.created_at,
         )
 
@@ -271,6 +283,6 @@ class AuditLogModel(Base, CreatedAtMixin, MetadataMixin):
             booking_id=audit_log.booking_id,
             action=audit_log.action,
             actor_id=audit_log.actor_id,
-            metadata=audit_log.metadata,
+            meta=audit_log.metadata,
             created_at=audit_log.created_at,
         )
