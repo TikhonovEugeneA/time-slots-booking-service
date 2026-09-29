@@ -5,9 +5,9 @@ from datetime import datetime
 
 @dataclass
 class ServiceCenter:
-    id: UUID = field(default_factory=uuid4)
     name: str
     address: str
     timezone: str
-    is_active: bool = True
     created_at: datetime
+    id: UUID = field(default_factory=uuid4)
+    is_active: bool = True
