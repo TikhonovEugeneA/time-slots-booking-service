@@ -12,6 +12,4 @@ class Base(DeclarativeBase):
         datetime: TIMESTAMP(timezone=True),
     }
 
-    id: Mapped[UUID] = mapped_column(
-        primary_key=True, autoincrement=True, default=uuid7
-    )
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid7)

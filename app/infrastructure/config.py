@@ -1,8 +1,9 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import BaseModel
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class DataBaseConfig(BaseModel):
@@ -17,21 +18,29 @@ class DataBaseConfig(BaseModel):
 
 
 class UrlPrefix(BaseModel):
-    prefix: str
+    prefix: str = ""
 
 
 class AppConfig(BaseModel):
-    host: str
-    port: int
+    host: str = "0.0.0.0"
+    port: int = 8000
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=(BASE_DIR / ".env", BASE_DIR / ".env.example"),
+        env_file=(
+            BASE_DIR / ".env.example",
+            BASE_DIR / ".env",
+            BASE_DIR / ".env.local",
+        ),
         env_prefix="APP_CONFIG__",
         env_nested_delimiter="__",
         extra="ignore",
     )
+
     database: DataBaseConfig
-    url: UrlPrefix = UrlPrefix()
-    app: AppConfig = AppConfig()
+    url: UrlPrefix = Field(default_factory=UrlPrefix)
+    app: AppConfig = Field(default_factory=AppConfig)
+
+
+settings = Settings()
